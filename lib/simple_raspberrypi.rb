@@ -2,32 +2,32 @@
 
 # file: simple_raspberrypi.rb
 
-# desc: This gem is the same as the rpi gem, with the only 
-#       difference being the class name. Use this as an alternative 
-#       to the rpi gem to avoid the possiblity of conflict with any 
-#       other gems which may use a module called RPi (i.e. rpi_gpio gem).
+# desc: This gem is similar to the rpi gem, with the only 
+#       difference being the class name and this gem depends upon 
+#       rpi_gpio instead of the pi_piper gem which depends upon wiringpi.
 
-require 'pi_piper'
+require 'rpi_gpio'
 
 
-class SimpleRaspberryPi
-  include PiPiper
+HIGH = 1
+LOW = 0
+
+class SimpleRaspberryPi  
   
-  @leds = []
 
-  class PinX < Pin
-
-    HIGH = 1
-    LOW = 0
-
+  class PinX
+    include RPi
+    
     def initialize(id)
+      
+      GPIO.setup id, :as => :output
       @id = id
-      super(pin: id, direction: :out)
-      @state = self.value
+      
     end
 
     def on(duration=nil)
-      super(); 
+
+      set_pin HIGH; 
       @state = :on
       (sleep duration; self.off) if duration
     end
@@ -35,7 +35,7 @@ class SimpleRaspberryPi
     def off(duration=nil)
 
       return if self.off?
-      super()
+      set_pin LOW      
       @state = :off
       (sleep duration; self.on) if duration
     end
@@ -73,7 +73,7 @@ class SimpleRaspberryPi
     def set_pin(val)
 
       state = @state
-      self.update_value val
+      val == HIGH ? GPIO.set_high(@id) : GPIO.set_low(@id)
       @state = state
     end
     
@@ -90,6 +90,8 @@ class SimpleRaspberryPi
   end  
 
   def initialize(x=[])
+    
+    RPi::GPIO.set_numbering :bcm  
     
     a = case x
     when Fixnum
@@ -132,9 +134,8 @@ class SimpleRaspberryPi
       
       next unless File.exists? '/sys/class/gpio/gpio' + pin.to_s
 
-      uexp = open("/sys/class/gpio/unexport", "w")
-      uexp.write(pin)
-      uexp.close
+      File.wite "/sys/class/gpio/unexport", pin
+
     end
     
   end
@@ -144,12 +145,7 @@ class SimpleRaspberryPi
   end
   
   def self.unexport(a)
-    a.each do |pin|
-      
-      uexp = open("/sys/class/gpio/unexport", "w")
-      uexp.write(pin)
-      uexp.close
-    end    
+    a.each {|pin| File.wite "/sys/class/gpio/unexport", pin }
   end
 
 end
