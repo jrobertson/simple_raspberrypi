@@ -3,10 +3,7 @@
 # file: simple_raspberrypi.rb
 
 # desc: This gem is similar to the rpi gem, with the only 
-#       difference being the class name and this gem depends upon 
-#       rpi_gpio instead of the pi_piper gem which depends upon wiringpi.
-
-require 'rpi_gpio'
+#       difference being the class name and this gem has no dependencies.
 
 
 HIGH = 1
@@ -16,11 +13,12 @@ class SimpleRaspberryPi
   
 
   class PinX
-    include RPi
     
     def initialize(id)
-      
-      GPIO.setup id, :as => :output
+
+      File.write '/sys/class/gpio/export', id
+      File.write "/sys/class/gpio/gpio#{id}/direction", 'out'
+
       @id = id
       
     end
@@ -73,7 +71,7 @@ class SimpleRaspberryPi
     def set_pin(val)
 
       state = @state
-      val == HIGH ? GPIO.set_high(@id) : GPIO.set_low(@id)
+      File.write "/sys/class/gpio/gpio#{@id}/value", val
       @state = state
     end
     
@@ -90,8 +88,6 @@ class SimpleRaspberryPi
   end  
 
   def initialize(x=[])
-
-    RPi::GPIO.set_numbering :bcm  
     
     a = case x
     when Fixnum
@@ -101,6 +97,8 @@ class SimpleRaspberryPi
     when Array
       x
     end
+
+    unexport_all a
     
     
     @pins = a.map {|pin| PinX.new pin.to_i }
@@ -120,8 +118,7 @@ class SimpleRaspberryPi
       # to avoid "Device or resource busy @ fptr_finalize - /sys/class/gpio/export"
       # we unexport the pins we used
       
-      #unexport_all a
-      RPi::GPIO.reset
+      unexport_all a
     end    
   end
 
