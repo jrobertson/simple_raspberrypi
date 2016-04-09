@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'simple_raspberrypi'
-  s.version = '0.2.1'
+  s.version = '0.2.2'
   s.summary = 'Has the same features as the rpi gem, but uses the rpi_gpio gem instead of the pi_piper gem.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/simple_raspberrypi.rb']

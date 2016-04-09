@@ -90,7 +90,7 @@ class SimpleRaspberryPi
   end  
 
   def initialize(x=[])
-    
+
     RPi::GPIO.set_numbering :bcm  
     
     a = case x
@@ -101,10 +101,9 @@ class SimpleRaspberryPi
     when Array
       x
     end
-
-    unexport_all a
     
-    @pins = a.map {|pin| PinX.new pin }
+    
+    @pins = a.map {|pin| PinX.new pin.to_i }
     
     def @pins.[](i)
 
@@ -121,7 +120,8 @@ class SimpleRaspberryPi
       # to avoid "Device or resource busy @ fptr_finalize - /sys/class/gpio/export"
       # we unexport the pins we used
       
-      unexport_all a
+      #unexport_all a
+      RPi::GPIO.reset
     end    
   end
 
