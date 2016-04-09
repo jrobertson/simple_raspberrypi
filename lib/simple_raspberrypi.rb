@@ -134,7 +134,7 @@ class SimpleRaspberryPi
       
       next unless File.exists? '/sys/class/gpio/gpio' + pin.to_s
 
-      File.wite "/sys/class/gpio/unexport", pin
+      File.write "/sys/class/gpio/unexport", pin
 
     end
     
@@ -145,7 +145,7 @@ class SimpleRaspberryPi
   end
   
   def self.unexport(a)
-    a.each {|pin| File.wite "/sys/class/gpio/unexport", pin }
+    a.each {|pin| File.write "/sys/class/gpio/unexport", pin }
   end
 
 end
